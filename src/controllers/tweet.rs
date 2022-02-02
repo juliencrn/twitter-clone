@@ -1,5 +1,6 @@
 use crate::constants::{APPLICATION_JSON, CONNECTION_POOL_ERROR};
 use crate::models::tweet::*;
+use crate::services::tweet::*;
 use crate::DBPool;
 use actix_web::{delete, get, post, web, HttpResponse};
 

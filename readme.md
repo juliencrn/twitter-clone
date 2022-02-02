@@ -54,10 +54,6 @@ diesel migration redo
 ```
 
 ```bash
-# start Postgres database
-brew services start postgresql # MacOS
-# and $ brew services stop postgresql # to stop
-
 # Setup database
 diesel setup
 

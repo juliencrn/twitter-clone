@@ -13,6 +13,7 @@ mod controllers;
 mod models;
 mod response;
 mod schema;
+mod services;
 
 use controllers::*;
 
