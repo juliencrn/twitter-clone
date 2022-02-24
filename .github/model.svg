@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   viewBox="0 0 3250 2430"
+   height="100%"
+   width="100%">
+  <style>
+.label, .field {
+  font-family:'Roboto-Light', 'Roboto', Helvetica, sans-serif;
+}
+.label {
+  font-weight:300;
+  font-size:100px;
+  fill: #ffffff;
+}
+.box {
+  fill: #404040;
+  rx: 70px;
+  ry: 70px;
+}
+.doc {
+  fill: #f0f0f0;
+  rx: 70px;
+  ry: 70px;
+}
+.field {
+  font-size: 50px;
+  fill: #272727;
+}
+.value {
+  font-family:'RobotoMono-Regular', 'Roboto Mono', monospace;
+  font-size:50px;
+  fill: #6474af;
+  text-anchor: end;
+}
+.lvalue {
+  font-family:'RobotoMono-Regular', 'Roboto Mono', monospace;
+  font-size:37px;
+  fill: #6474af;
+  text-anchor: start;
+}
+.dot {
+  fill: #000000;
+  stroke: none;
+  r: 15px;
+}
+.line {
+  fill: none;
+  stroke: #404040;
+  stroke-width:5px;
+}
+</style>
+  <g>
+    <rect ry="70" class="doc" height="370" width="730" y="205" x="60" />
+    <text class="field" y="400" x="120">email</text>
+    <text class="value" y="400" x="730">user1@test.com</text>
+    <text class="field" y="500" x="120">user</text>
+    <rect ry="70" class="box" height="300" width="850" y="5" x="0" />
+    <text class="label" y="190" x="120">Accounts</text>
+  </g>
+  <g>
+    <rect ry="70" class="doc" height="470" width="730" y="205" x="1260" />
+    <text class="field" y="400" x="1320">name</text>
+    <text class="value" y="400" x="1930">Mary</text>
+    <text class="field" y="500" x="1320">handle</text>
+    <text class="value" y="500" x="1930">@logiconly9</text>
+    <text class="field" y="600" x="1320">icon</text>
+    <text class="value" y="600" x="1930">user1</text>
+    <rect ry="70" class="box" height="300" width="850" y="5" x="1200" />
+    <text class="label" y="190" x="1320">Users</text>
+  </g>
+  <g>
+    <rect ry="70" class="doc" height="570" width="730" y="205" x="2460" />
+    <text class="field" y="400" x="2520">author</text>
+    <text class="field" y="500" x="2520">follower</text>
+    <text class="field" y="600" x="2520">postlikes</text>
+    <text class="value" y="600" x="3130">13</text>
+    <text class="field" y="700" x="2520">postrefweets</text>
+    <text class="value" y="700" x="3130">5</text>
+    <rect ry="70" class="box" height="300" width="850" y="5" x="2400" />
+    <text class="label" y="190" x="2520">Followerstats</text>
+  </g>
+  <g>
+    <rect ry="70" class="doc" height="470" width="730" y="1105" x="60" />
+    <text class="field" y="1300" x="120">message</text>
+    <text class="value" y="1300" x="730">Awesome!</text>
+    <text class="field" y="1400" x="120">author</text>
+    <text class="field" y="1500" x="120">fweet</text>
+    <rect ry="70" class="box" height="300" width="850" y="905" x="0" />
+    <text class="label" y="1090" x="120">Comments</text>
+  </g>
+  <g>
+    <rect ry="70" class="doc" height="1320" width="1130" y="1105" x="1060" />
+    <text class="field" y="1300" x="1120">message</text>
+    <text class="value" y="1300" x="2130">Hello World!</text>
+    <text class="field" y="1400" x="1120">author</text>
+    <text class="field" y="1500" x="1120">hashtags</text>
+    <text class="field" y="1600" x="1120">likes</text>
+    <text class="value" y="1600" x="2130">86</text>
+    <text class="field" y="1700" x="1120">refweets</text>
+    <text class="value" y="1700" x="2130">6</text>
+    <text class="field" y="1800" x="1120">comments</text>
+    <text class="value" y="1800" x="2130">17</text>
+    <text class="field" y="1900" x="1120">created</text>
+    <text class="value" y="1900" x="2130">2020-05-14T12:35:59.209273Z</text>
+    <text class="field" y="2000" x="1120">original</text>
+    <text class="field" y="2100" x="1120">asset</text>
+    <text class="lvalue" y="2100" x="1300">{</text>
+    <text class="lvalue" y="2150" x="1300">  &quot;id&quot;: &quot;old_Dino_osx4za&quot;,</text>
+    <text class="lvalue" y="2200" x="1300">  &quot;url&quot;: &quot;https://res.cloudinary...&quot;,</text>
+    <text class="lvalue" y="2250" x="1300">  &quot;type&quot;: &quot;image&quot;,</text>
+    <text class="lvalue" y="2300" x="1300">  &quot;cloudName&quot;: &quot;dtkj34c6h&quot;,</text>
+    <text class="lvalue" y="2350" x="1300">}</text>
+    <rect ry="70" class="box" height="300" width="1250" y="905" x="1000" />
+    <text class="label" y="1090" x="1120">Fweets</text>
+  </g>
+  <g >
+    <rect ry="70" class="doc" height="670" width="730" y="1105" x="2460" />
+    <text class="field" y="1300" x="2520">user</text>
+    <text class="field" y="1400" x="2520">fweet</text>
+    <text class="field" y="1500" x="2520">like</text>
+    <text class="value" y="1500" x="3130">true</text>
+    <text class="field" y="1600" x="2520">refweet</text>
+    <text class="value" y="1600" x="3130">false</text>
+    <text class="field" y="1700" x="2520">comment</text>
+    <text class="value" y="1700" x="3130">true</text>
+    <rect ry="70" class="box" height="300" width="850" y="905" x="2400" />
+    <text class="label" y="1090" x="2520">Fweetstats</text>
+  </g>
+  <g>
+    <rect ry="70" class="doc" height="270" width="730" y="2105" x="2460"/>
+    <text class="field" y="2300" x="2520">name</text>
+    <text class="value" y="2300" x="3130">#lockdown</text>
+    <rect ry="70" class="box" height="300" width="850" y="1905" x="2400" />
+    <text class="label" y="2090" x="2520">Hashtags</text>
+  </g>
+  <path class="line" d="m 498.52528,1471.889 c 429.33323,0 393.68837,-404.9157 503.40592,-404.9157" />
+  <path class="line" d="m 493.96067,1373.75 c 785.15553,0 306.30003,-1185.46348 708.81323,-1185.46348" />
+  <path class="line" d="m 320.50562,485.93399 c 747.90638,0 725.62188,-350.14045 877.70368,-350.14045" />
+  <path class="line" d="m 2046.2807,61.460303 c 250,0 170.387,276.580427 410.9524,276.580427 126.934,0 276.6152,15.51966 371.8399,56.60112" />
+  <path d="m 2049.5084,121.18366 c 201.585,0 167.1593,308.85707 407.7247,308.85707 126.934,0 276.6152,15.51966 371.8399,56.60112" class="line" />
+  <path class="line" d="m 1456.1095,1487.2036 c 42.3104,0 589.3854,-0.4564 651.9312,-0.4564 268.4368,0 103.1352,567.8371 291.9592,567.8371" />
+  <path d="m 1001.9311,1142.5758 c -135.70923,0 -102.24302,796.0675 58.5324,796.0675 345.9656,0 308.5425,20.0843 396.9451,42.9073" class="line" />
+  <path d="m 1456.1095,1392.4716 c 42.3104,0 589.3854,-0.4564 651.9312,-0.4564 142.2876,0 199.4389,-85.1034 199.4389,-265.1878 0,-762.20039 -188.2865,-882.47869 -256.0675,-880.86486" class="line" />
+  <path d="m 2046.2807,184.74556 c 178.2565,6.45533 283.0167,390.35185 296.9681,582.09407 25.2594,347.15547 -30.5059,475.58117 120.4397,475.58117 126.934,0 270.1598,-3.8464 365.3845,37.2351" class="line" />
+  <path class="line" d="m 2217.3469,1183.6789 c 32.6531,21.3211 53.3889,150.7015 188.2436,150.7015 126.934,0 331.4855,5.8366 426.7102,46.9181" />
+  <circle cy="1373" cx="503" class="dot" />
+  <circle cx="503" cy="1472" class="dot" />
+  <circle class="dot" cy="1392" cx="1457" />
+  <circle class="dot" cx="1457" cy="1485" />
+  <circle cy="1979" cx="1457" class="dot" />
+  <circle cx="2832" cy="1279" class="dot" />
+  <circle cy="1380" cx="2832" class="dot" />
+  <circle class="dot" cx="2832" cy="488" />
+  <circle cy="391" cx="2832" class="dot" />
+  <circle cx="326" cy="485" class="dot" />
+</svg>

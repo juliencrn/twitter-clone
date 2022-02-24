@@ -1,54 +1,48 @@
-extern crate actix_web;
 #[macro_use]
 extern crate diesel;
-extern crate dotenv;
 
-use actix_web::{middleware, App, HttpServer};
-use diesel::pg::PgConnection;
-use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
-use std::env;
+pub mod api;
+pub mod constants;
+pub mod db;
+pub mod models;
+pub mod response;
+pub mod schema;
 
-mod constants;
-mod controllers;
-mod models;
-mod response;
-mod schema;
-mod services;
-
-use controllers::*;
-
-pub type DBPool = Pool<ConnectionManager<PgConnection>>;
-pub type DBPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
+use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
-    env::set_var("RUST_LOG", "actix_web=debug,actix_server=info");
+    std::env::set_var("RUST_LOG", "actix_web=debug,actix_server=info");
     env_logger::init();
 
     // set up database connection pool
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL");
-    let manager = ConnectionManager::<PgConnection>::new(database_url);
-    let pool = Pool::builder()
-        .build(manager)
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL");
+    let pool = db::init_pool(&database_url)
+        .await
         .expect("Failed to create pool");
 
+    log::info!("starting HTTP server at http://localhost:8080");
+
     HttpServer::new(move || {
+        log::debug!("Constructing the App");
+
         App::new()
+            // enable automatic response compression - usually register this first
+            .wrap(middleware::Compress::default())
             // Set up DB pool to be used with web::Data<Pool> extractor
             .data(pool.clone())
             // enable logger - always register actix-web Logger middleware last
             .wrap(middleware::Logger::default())
             // register HTTP requests handlers
-            .service(tweet::list)
-            .service(tweet::get)
-            .service(tweet::create)
-            .service(tweet::delete)
-            .service(like::list)
-            .service(like::plus_one)
-            .service(like::minus_one)
+            .service(api::tweets::find_all)
+            .service(api::tweets::find_one)
+            .service(api::tweets::create)
+            .service(api::tweets::delete)
+            .default_service(web::to(|| HttpResponse::MethodNotAllowed().finish()))
     })
     .bind("127.0.0.1:8080")?
+    .workers(2)
     .run()
     .await
 }

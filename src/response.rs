@@ -9,4 +9,8 @@ impl<T> Response<T> {
     pub fn new() -> Self {
         Self { results: vec![] }
     }
+
+    pub fn from(results: Vec<T>) -> Self {
+        Self { results }
+    }
 }

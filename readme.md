@@ -1,6 +1,14 @@
 # Twitter Clone
 
-A Rest API as an "Hello world" with Rust, Actix-web and PostgreSQL following this [tutorial](https://hub.qovery.com/guides/tutorial/create-a-blazingly-fast-api-in-rust-part-1/).
+I'm learning Rust. The first version of this project was just a basic CRUD application to create a REST API connected to a SQL database following this [tutorial](https://hub.qovery.com/guides/tutorial/create-a-blazingly-fast-api-in-rust-part-1/).
+
+Now, we will create a better version more close than a real-world application with user auth, an API closest than the real Twitter API and a bigger focus on the database structure and tables relations. I want to build this by myself, without any step-by-step tutorial, but I will use the data-structure model from this [post](https://docs.fauna.com/fauna/current/learn/sample_apps/fwitter),  that seems to be a good schema.
+
+The final model for the application looks like this:
+
+(but I still will use "tweet" instead of "fweet" :) )
+
+![model](.github/model.svg)
 
 ## API Design
 
@@ -62,4 +70,13 @@ cargo run
 
 # Tests
 cargo test
+```
+
+
+
+### Additionnal note
+
+```
+cargo install cargo-watch
+cargo install diesel_cli --no-default-features --features postgres
 ```
