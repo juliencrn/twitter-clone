@@ -19,64 +19,34 @@ The final model for the application looks like this:
 /tweets/:id
     GET: find a tweet by its ID
     DELETE: delete a tweet by its ID
-/tweets/:id/likes
-    GET: list all likes attached to a tweet
-    POST: add +1 like to a tweet
-    DELETE: add -1 like to a tweet
 ```
 
-## Install
+## Installation
 
-This project requires:
+### Requirements
 
-- Rustc - cargo installed
-- PostgreSQL running server
-- diesel_cli
+- Set `POSTGRES_USER`, `POSTGRES_PASSWORD` and `POSTGRES_DB` in an `.env` file.
+- Docker
+- Rust
 
-### 1. Setup the PostgreSQL database (on macOS)
-
-```bash
-# Install Postgres
-brew install postgres
-
-# start Postgres database
-brew services start postgresql
-# and $ brew services stop postgresql # to stop
-
-# Create main user and set role
-psql postgres
-# Then type this in the interactive term
-> CREATE ROLE username WITH LOGIN PASSWORD 'password';
-> ALTER ROLE username CREATEDB;
-
-# Then type \q + Enter to quit.
-# Install pgAdmin 4
-
-# Create migration (if doesn't exists)
-# diesel migration generate create_tweets
-# diesel migration generate create_likes
-
-# Exec migration
-diesel migration run
-diesel migration redo
-```
-
-```bash
-# Setup database
-diesel setup
-
-# Launch dev server
-cargo run
-
-# Tests
-cargo test
-```
-
-
-
-### Additionnal note
-
-```
+```sh
+# Install the tools (the first time only)
 cargo install cargo-watch
 cargo install diesel_cli --no-default-features --features postgres
+
+# Create the docker volume (the first time only)
+docker volume create --name=twitter-db
+
+# Run the db container
+docker-compose up -d
+
+# Setup the db (the first time only)
+diesel setup
+diesel migration run
+
+# Run the app in watch mode
+cargo watch -x run
+
+# Stop the db
+docker-compose down
 ```

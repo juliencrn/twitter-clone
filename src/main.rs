@@ -17,7 +17,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     // set up database connection pool
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL");
+    let database_url = get_db_url().expect("POSTGRES_* env variable(s) missing");
     let pool = db::init_pool(&database_url)
         .await
         .expect("Failed to create pool");
@@ -45,4 +45,15 @@ async fn main() -> std::io::Result<()> {
     .workers(2)
     .run()
     .await
+}
+
+fn get_db_url() -> Result<String, std::env::VarError> {
+    use std::env::var;
+
+    Ok(format!(
+        "postgres://{}:{}@localhost:5432/{}",
+        var("POSTGRES_USER")?,
+        var("POSTGRES_PASSWORD")?,
+        var("POSTGRES_DB")?
+    ))
 }
