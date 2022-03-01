@@ -1,12 +1,14 @@
 #[macro_use]
 extern crate diesel;
+#[macro_use]
+extern crate log;
 
-pub mod api;
+pub mod api_error;
 pub mod constants;
 pub mod db;
-pub mod models;
 pub mod response;
 pub mod schema;
+pub mod tweet;
 
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 
@@ -22,10 +24,10 @@ async fn main() -> std::io::Result<()> {
         .await
         .expect("Failed to create pool");
 
-    log::info!("starting HTTP server at http://localhost:8080");
+    info!("starting HTTP server...");
 
-    HttpServer::new(move || {
-        log::debug!("Constructing the App");
+    let server = HttpServer::new(move || {
+        debug!("Constructing the App");
 
         App::new()
             // enable automatic response compression - usually register this first
@@ -35,16 +37,15 @@ async fn main() -> std::io::Result<()> {
             // enable logger - always register actix-web Logger middleware last
             .wrap(middleware::Logger::default())
             // register HTTP requests handlers
-            .service(api::tweets::find_all)
-            .service(api::tweets::find_one)
-            .service(api::tweets::create)
-            .service(api::tweets::delete)
+            .configure(tweet::init_routes)
             .default_service(web::to(|| HttpResponse::MethodNotAllowed().finish()))
     })
-    .bind("127.0.0.1:8080")?
     .workers(2)
-    .run()
-    .await
+    .bind("127.0.0.1:8080")?;
+
+    info!("Server running on http://localhost:8080");
+
+    server.run().await
 }
 
 fn get_db_url() -> Result<String, std::env::VarError> {
