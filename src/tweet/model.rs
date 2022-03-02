@@ -1,11 +1,10 @@
 use chrono::{NaiveDateTime, Utc};
-use diesel;
-use diesel::pg::PgConnection;
-use diesel::prelude::*;
+use diesel::{self, prelude::*};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::api_error::ApiError;
+use crate::db;
 use crate::schema::tweets;
 
 // TODO: Implement relation fields
@@ -58,41 +57,46 @@ impl TweetRequest {
 }
 
 impl Tweet {
-    pub fn find(id: Uuid, conn: &PgConnection) -> Result<Self, ApiError> {
+    pub fn find(id: Uuid) -> Result<Self, ApiError> {
+        let conn = db::connection()?;
         let tweet = tweets::table
             .filter(tweets::id.eq(id))
-            .first::<Tweet>(conn)?;
+            .first::<Tweet>(&conn)?;
 
         Ok(tweet)
     }
 
-    pub fn find_all(limit: i64, conn: &PgConnection) -> Result<Vec<Self>, ApiError> {
+    pub fn find_all(limit: i64) -> Result<Vec<Self>, ApiError> {
+        let conn = db::connection()?;
         let all_tweets = tweets::table
             .order(tweets::created.desc())
             .limit(limit)
-            .load::<Tweet>(conn)?;
+            .load::<Tweet>(&conn)?;
 
         Ok(all_tweets)
     }
 
-    pub fn update(id: Uuid, conn: &PgConnection, dto: TweetDto) -> Result<Self, ApiError> {
+    pub fn update(id: Uuid, dto: TweetDto) -> Result<Self, ApiError> {
+        let conn = db::connection()?;
         let tweet = diesel::update(tweets::table.find(id))
             .set((tweets::message.eq(dto.message), tweets::asset.eq(dto.asset)))
-            .get_result::<Tweet>(conn)?;
+            .get_result::<Tweet>(&conn)?;
 
         Ok(tweet)
     }
 
-    pub fn insert(dto: TweetDto, conn: &PgConnection) -> Result<Self, ApiError> {
+    pub fn insert(dto: TweetDto) -> Result<Self, ApiError> {
+        let conn = db::connection()?;
         let tweet = diesel::insert_into(tweets::table)
             .values(Tweet::from(dto))
-            .get_result::<Tweet>(conn)?;
+            .get_result::<Tweet>(&conn)?;
 
         Ok(tweet)
     }
 
-    pub fn delete(id: Uuid, conn: &PgConnection) -> Result<Self, ApiError> {
-        let tweet = diesel::delete(tweets::table.find(id)).get_result::<Tweet>(conn)?;
+    pub fn delete(id: Uuid) -> Result<Self, ApiError> {
+        let conn = db::connection()?;
+        let tweet = diesel::delete(tweets::table.find(id)).get_result::<Tweet>(&conn)?;
 
         Ok(tweet)
     }

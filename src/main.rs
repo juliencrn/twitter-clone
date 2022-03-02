@@ -4,7 +4,6 @@ extern crate diesel;
 extern crate log;
 
 pub mod api_error;
-pub mod constants;
 pub mod db;
 pub mod response;
 pub mod schema;
@@ -17,12 +16,7 @@ async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
     std::env::set_var("RUST_LOG", "actix_web=debug,actix_server=info");
     env_logger::init();
-
-    // set up database connection pool
-    let database_url = get_db_url().expect("POSTGRES_* env variable(s) missing");
-    let pool = db::init_pool(&database_url)
-        .await
-        .expect("Failed to create pool");
+    db::init();
 
     info!("starting HTTP server...");
 
@@ -32,8 +26,6 @@ async fn main() -> std::io::Result<()> {
         App::new()
             // enable automatic response compression - usually register this first
             .wrap(middleware::Compress::default())
-            // Set up DB pool to be used with web::Data<Pool> extractor
-            .data(pool.clone())
             // enable logger - always register actix-web Logger middleware last
             .wrap(middleware::Logger::default())
             // register HTTP requests handlers
@@ -46,15 +38,4 @@ async fn main() -> std::io::Result<()> {
     info!("Server running on http://localhost:8080");
 
     server.run().await
-}
-
-fn get_db_url() -> Result<String, std::env::VarError> {
-    use std::env::var;
-
-    Ok(format!(
-        "postgres://{}:{}@localhost:5432/{}",
-        var("POSTGRES_USER")?,
-        var("POSTGRES_PASSWORD")?,
-        var("POSTGRES_DB")?
-    ))
 }
