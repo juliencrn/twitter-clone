@@ -17,7 +17,7 @@ use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
-    std::env::set_var("RUST_LOG", "actix_web=debug,actix_server=info");
+    std::env::set_var("RUST_LOG", "actix_web=debug,actix_server=info,twitter=info");
     env_logger::init();
     db::init();
 
