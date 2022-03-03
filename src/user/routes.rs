@@ -1,4 +1,5 @@
 use crate::api_error::ApiError;
+use crate::response::Response;
 use crate::user::{User, UserDto};
 use actix_web::{delete, get, post, put, web, HttpResponse};
 use serde_json::json;
@@ -7,7 +8,7 @@ use serde_json::json;
 async fn find_all() -> Result<HttpResponse, ApiError> {
     let users = User::find_all()?;
 
-    Ok(HttpResponse::Ok().json(users))
+    Ok(HttpResponse::Ok().json(Response::from(users)))
 }
 
 #[get("/users/{handle}")]
