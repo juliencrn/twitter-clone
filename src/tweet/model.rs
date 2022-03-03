@@ -98,12 +98,12 @@ impl Tweet {
         Ok(tweet)
     }
 
-    pub fn delete(id: Uuid) -> Result<usize, ApiError> {
+    pub fn delete(id: Uuid) -> Result<Tweet, ApiError> {
         let conn = db::connection()?;
 
-        let res = diesel::delete(tweets::table.find(id)).execute(&conn)?;
+        let tweet = diesel::delete(tweets::table.find(id)).get_result(&conn)?;
 
-        Ok(res)
+        Ok(tweet)
     }
 }
 

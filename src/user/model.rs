@@ -59,12 +59,13 @@ impl User {
         Ok(user)
     }
 
-    pub fn delete(handle: &str) -> Result<usize, ApiError> {
+    pub fn delete(handle: &str) -> Result<User, ApiError> {
         let conn = db::connection()?;
 
-        let res = diesel::delete(users::table.filter(users::handle.eq(handle))).execute(&conn)?;
+        let user =
+            diesel::delete(users::table.filter(users::handle.eq(handle))).get_result(&conn)?;
 
-        Ok(res)
+        Ok(user)
     }
 }
 
