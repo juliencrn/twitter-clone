@@ -4,6 +4,7 @@ use crate::schema::users;
 use chrono::{NaiveDateTime, Utc};
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, AsChangeset)]
 #[table_name = "users"]
@@ -15,6 +16,7 @@ pub struct UserDto {
 #[derive(Serialize, Deserialize, Queryable, Insertable)]
 #[table_name = "users"]
 pub struct User {
+    pub id: Uuid,
     pub name: String,   // Mary
     pub handle: String, // @logiconly9 (unique)
     pub created: NaiveDateTime,
@@ -29,10 +31,10 @@ impl User {
         Ok(users)
     }
 
-    pub fn find(handle: &str) -> Result<Self, ApiError> {
+    pub fn find(id: Uuid) -> Result<Self, ApiError> {
         let conn = db::connection()?;
 
-        let user = users::table.filter(users::handle.eq(handle)).first(&conn)?;
+        let user = users::table.filter(users::id.eq(id)).first(&conn)?;
 
         Ok(user)
     }
@@ -48,22 +50,21 @@ impl User {
         Ok(user)
     }
 
-    pub fn update(handle: &str, user: UserDto) -> Result<Self, ApiError> {
+    pub fn update(id: Uuid, user: UserDto) -> Result<Self, ApiError> {
         let conn = db::connection()?;
 
         let user = diesel::update(users::table)
-            .filter(users::handle.eq(handle))
+            .filter(users::id.eq(id))
             .set(user)
             .get_result(&conn)?;
 
         Ok(user)
     }
 
-    pub fn delete(handle: &str) -> Result<User, ApiError> {
+    pub fn delete(id: Uuid) -> Result<Self, ApiError> {
         let conn = db::connection()?;
 
-        let user =
-            diesel::delete(users::table.filter(users::handle.eq(handle))).get_result(&conn)?;
+        let user = diesel::delete(users::table.filter(users::id.eq(id))).get_result(&conn)?;
 
         Ok(user)
     }
@@ -72,6 +73,7 @@ impl User {
 impl From<UserDto> for User {
     fn from(user: UserDto) -> Self {
         User {
+            id: Uuid::new_v4(),
             name: user.name,
             handle: user.handle,
             created: Utc::now().naive_utc(),

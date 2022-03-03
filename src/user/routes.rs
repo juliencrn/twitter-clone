@@ -3,6 +3,7 @@ use crate::response::Response;
 use crate::user::{User, UserDto};
 use actix_web::{delete, get, post, put, web, HttpResponse};
 use serde_json::json;
+use uuid::Uuid;
 
 #[get("/users")]
 async fn find_all() -> Result<HttpResponse, ApiError> {
@@ -12,8 +13,9 @@ async fn find_all() -> Result<HttpResponse, ApiError> {
 }
 
 #[get("/users/{handle}")]
-async fn find(handle: web::Path<String>) -> Result<HttpResponse, ApiError> {
-    let user = User::find(&handle)?;
+async fn find(id: web::Path<Uuid>) -> Result<HttpResponse, ApiError> {
+    let user_id = id.into_inner();
+    let user = User::find(user_id)?;
 
     Ok(HttpResponse::Ok().json(user))
 }
@@ -26,18 +28,17 @@ async fn create(user: web::Json<UserDto>) -> Result<HttpResponse, ApiError> {
 }
 
 #[put("/users/{handle}")]
-async fn update(
-    handle: web::Path<String>,
-    user: web::Json<UserDto>,
-) -> Result<HttpResponse, ApiError> {
-    let user = User::update(&handle, user.into_inner())?;
+async fn update(id: web::Path<Uuid>, user: web::Json<UserDto>) -> Result<HttpResponse, ApiError> {
+    let user_id = id.into_inner();
+    let user = User::update(user_id, user.into_inner())?;
 
     Ok(HttpResponse::Ok().json(user))
 }
 
 #[delete("/users/{handle}")]
-async fn delete(handle: web::Path<String>) -> Result<HttpResponse, ApiError> {
-    let num_deleted = User::delete(&handle)?;
+async fn delete(id: web::Path<Uuid>) -> Result<HttpResponse, ApiError> {
+    let user_id = id.into_inner();
+    let num_deleted = User::delete(user_id)?;
 
     Ok(HttpResponse::Ok().json(json!({ "deleted": num_deleted })))
 }

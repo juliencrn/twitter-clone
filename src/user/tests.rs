@@ -29,7 +29,7 @@ mod tests {
 
         // Find the created user
         let resp = TestRequest::get()
-            .uri(&format!("/users/{}", user.handle))
+            .uri(&format!("/users/{}", user.id))
             .send_request(&mut app)
             .await;
         assert!(resp.status().is_success(), "Failed to find user");
@@ -45,7 +45,7 @@ mod tests {
 
         // Update the user
         let resp = TestRequest::put()
-            .uri(&format!("/users/{}", user.handle))
+            .uri(&format!("/users/{}", user.id))
             .set_json(&request_body)
             .send_request(&mut app)
             .await;
@@ -59,14 +59,14 @@ mod tests {
 
         // Delete the user
         let resp = TestRequest::delete()
-            .uri(&format!("/users/{}", user.handle))
+            .uri(&format!("/users/{}", user.id))
             .send_request(&mut app)
             .await;
         assert!(resp.status().is_success(), "Failed to delete user");
 
         // Try find deleted user
         let resp = TestRequest::get()
-            .uri(&format!("/users/{}", user.handle))
+            .uri(&format!("/users/{}", user.id))
             .send_request(&mut app)
             .await;
         assert!(
