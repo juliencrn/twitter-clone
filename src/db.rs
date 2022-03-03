@@ -14,7 +14,7 @@ pub async fn init_pool(database_url: &str) -> Result<DBPool, r2d2::Error> {
 
 lazy_static! {
     static ref POOL: DBPool = {
-        let db_url = get_db_url().expect("Database url not set");
+        let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL missing");
         let manager = ConnectionManager::<PgConnection>::new(db_url);
 
         // test_transaction doesn't support multiple tx
@@ -28,17 +28,6 @@ lazy_static! {
             .build(manager)
             .expect("Failed to create db pool")
     };
-}
-
-fn get_db_url() -> Result<String, std::env::VarError> {
-    use std::env::var;
-
-    Ok(format!(
-        "postgres://{}:{}@localhost:5432/{}",
-        var("POSTGRES_USER")?,
-        var("POSTGRES_PASSWORD")?,
-        var("POSTGRES_DB")?
-    ))
 }
 
 pub fn init() {

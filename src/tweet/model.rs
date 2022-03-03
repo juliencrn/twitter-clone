@@ -8,7 +8,7 @@ use crate::db;
 use crate::schema::tweets;
 
 // TODO: Implement relation fields
-#[derive(Queryable, Debug, Insertable, Deserialize, Serialize)]
+#[derive(Queryable, Insertable, Deserialize, Serialize)]
 #[table_name = "tweets"]
 pub struct Tweet {
     pub id: Uuid,
@@ -59,6 +59,7 @@ impl TweetRequest {
 impl Tweet {
     pub fn find(id: Uuid) -> Result<Self, ApiError> {
         let conn = db::connection()?;
+
         let tweet = tweets::table
             .filter(tweets::id.eq(id))
             .first::<Tweet>(&conn)?;
@@ -68,6 +69,7 @@ impl Tweet {
 
     pub fn find_all(limit: i64) -> Result<Vec<Self>, ApiError> {
         let conn = db::connection()?;
+
         let all_tweets = tweets::table
             .order(tweets::created.desc())
             .limit(limit)
@@ -78,6 +80,7 @@ impl Tweet {
 
     pub fn update(id: Uuid, dto: TweetDto) -> Result<Self, ApiError> {
         let conn = db::connection()?;
+
         let tweet = diesel::update(tweets::table.find(id))
             .set((tweets::message.eq(dto.message), tweets::asset.eq(dto.asset)))
             .get_result::<Tweet>(&conn)?;
@@ -87,6 +90,7 @@ impl Tweet {
 
     pub fn insert(dto: TweetDto) -> Result<Self, ApiError> {
         let conn = db::connection()?;
+
         let tweet = diesel::insert_into(tweets::table)
             .values(Tweet::from(dto))
             .get_result::<Tweet>(&conn)?;
@@ -94,11 +98,12 @@ impl Tweet {
         Ok(tweet)
     }
 
-    pub fn delete(id: Uuid) -> Result<Self, ApiError> {
+    pub fn delete(id: Uuid) -> Result<usize, ApiError> {
         let conn = db::connection()?;
-        let tweet = diesel::delete(tweets::table.find(id)).get_result::<Tweet>(&conn)?;
 
-        Ok(tweet)
+        let res = diesel::delete(tweets::table.find(id)).execute(&conn)?;
+
+        Ok(res)
     }
 }
 

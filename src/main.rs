@@ -8,6 +8,7 @@ pub mod db;
 pub mod response;
 pub mod schema;
 pub mod tweet;
+pub mod user;
 
 #[cfg(test)]
 mod test;
@@ -32,7 +33,10 @@ async fn main() -> std::io::Result<()> {
             // enable logger - always register actix-web Logger middleware last
             .wrap(middleware::Logger::default())
             // register HTTP requests handlers
-            .configure(tweet::init_routes)
+            .configure(|cfg| {
+                tweet::init_routes(cfg);
+                user::init_routes(cfg);
+            })
             .default_service(web::to(|| HttpResponse::MethodNotAllowed()))
     })
     .workers(2)

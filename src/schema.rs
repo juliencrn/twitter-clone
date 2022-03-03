@@ -9,3 +9,16 @@ table! {
         asset -> Text,
     }
 }
+
+table! {
+    users (handle) {
+        name -> Varchar,
+        handle -> Varchar,
+        created -> Timestamp,
+    }
+}
+
+allow_tables_to_appear_in_same_query!(
+    tweets,
+    users,
+);
