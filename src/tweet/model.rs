@@ -11,25 +11,25 @@ use crate::schema::tweets;
 #[derive(Queryable, Debug, Insertable, Deserialize, Serialize)]
 #[table_name = "tweets"]
 pub struct Tweet {
-    id: Uuid,
-    message: String, // Hello world!
+    pub id: Uuid,
+    pub message: String, // Hello world!
 
     // author: Uuid,           // User
     // hashtags: Vec<Uuid>,    // Hashtag[]
-    likes: i32,             // 86
-    retweets: i32,          // 6
-    comments: i32,          // 17
-    created: NaiveDateTime, // 2020-05-14T12:35:59.209273Z
+    pub likes: i32,             // 86
+    pub retweets: i32,          // 6
+    pub comments: i32,          // 17
+    pub created: NaiveDateTime, // 2020-05-14T12:35:59.209273Z
 
     // original: Option<Uuid>, // Tweet
-    asset: String, /* json like:
-                   {
-                       "id": "fdjnfdsj",
-                       "url": "https://res...",
-                       "type": "image",
-                       "cloudName": "ffdgsgbr"
-                   }
-                   */
+    pub asset: String, /* json like:
+                       {
+                           "id": "fdjnfdsj",
+                           "url": "https://res...",
+                           "type": "image",
+                           "cloudName": "ffdgsgbr"
+                       }
+                       */
 }
 
 #[derive(Debug, Deserialize, Serialize)]

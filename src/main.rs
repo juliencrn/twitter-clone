@@ -9,6 +9,9 @@ pub mod response;
 pub mod schema;
 pub mod tweet;
 
+#[cfg(test)]
+mod test;
+
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 
 #[actix_web::main]
@@ -30,7 +33,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             // register HTTP requests handlers
             .configure(tweet::init_routes)
-            .default_service(web::to(|| HttpResponse::MethodNotAllowed().finish()))
+            .default_service(web::to(|| HttpResponse::MethodNotAllowed()))
     })
     .workers(2)
     .bind("127.0.0.1:8080")?;
