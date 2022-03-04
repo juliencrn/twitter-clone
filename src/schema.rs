@@ -16,7 +16,11 @@ table! {
         name -> Varchar,
         handle -> Varchar,
         created -> Timestamp,
+        password -> Varchar,
     }
 }
 
-allow_tables_to_appear_in_same_query!(tweets, users,);
+allow_tables_to_appear_in_same_query!(
+    tweets,
+    users,
+);

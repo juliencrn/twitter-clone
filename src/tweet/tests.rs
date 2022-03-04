@@ -9,7 +9,7 @@ mod tests {
     use serde_json::json;
 
     #[actix_web::test]
-    async fn test_user() {
+    async fn test_tweet() {
         // prepare
         crate::test::init();
         let message_test: &str = "Hey, I'm a test tweet!";

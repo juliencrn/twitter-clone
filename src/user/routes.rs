@@ -1,6 +1,6 @@
 use crate::api_error::ApiError;
 use crate::response::Response;
-use crate::user::{User, UserDto};
+use crate::user::{CreateUserDto, UpdateUserDto, User};
 use actix_web::{delete, get, post, put, web, HttpResponse};
 use serde_json::json;
 use uuid::Uuid;
@@ -20,15 +20,19 @@ async fn find(id: web::Path<Uuid>) -> Result<HttpResponse, ApiError> {
     Ok(HttpResponse::Ok().json(user))
 }
 
-#[post("/users")]
-async fn create(user: web::Json<UserDto>) -> Result<HttpResponse, ApiError> {
+// TODO: Auth routes should be in a separate module
+#[post("/auth/register")]
+async fn register(user: web::Json<CreateUserDto>) -> Result<HttpResponse, ApiError> {
     let user = User::create(user.into_inner())?;
 
     Ok(HttpResponse::Ok().json(user))
 }
 
 #[put("/users/{handle}")]
-async fn update(id: web::Path<Uuid>, user: web::Json<UserDto>) -> Result<HttpResponse, ApiError> {
+async fn update(
+    id: web::Path<Uuid>,
+    user: web::Json<UpdateUserDto>,
+) -> Result<HttpResponse, ApiError> {
     let user_id = id.into_inner();
     let user = User::update(user_id, user.into_inner())?;
 
@@ -46,7 +50,9 @@ async fn delete(id: web::Path<Uuid>) -> Result<HttpResponse, ApiError> {
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(find_all);
     cfg.service(find);
-    cfg.service(create);
     cfg.service(update);
     cfg.service(delete);
+
+    // TODO: Auth routes should be in a separate module
+    cfg.service(register);
 }

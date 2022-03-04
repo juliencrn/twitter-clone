@@ -33,10 +33,8 @@ async fn main() -> std::io::Result<()> {
             // enable logger - always register actix-web Logger middleware last
             .wrap(middleware::Logger::default())
             // register HTTP requests handlers
-            .configure(|cfg| {
-                tweet::init_routes(cfg);
-                user::init_routes(cfg);
-            })
+            .configure(tweet::init_routes)
+            .configure(user::init_routes)
             .default_service(web::to(|| HttpResponse::MethodNotAllowed()))
     })
     .workers(2)
