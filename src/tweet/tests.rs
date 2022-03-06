@@ -1,8 +1,11 @@
 #[cfg(test)]
 mod tests {
+    use crate::auth::WebToken;
     use crate::response::Response;
-    use crate::tweet::{init_routes, Tweet};
+    use crate::routes::routes;
+    use crate::tweet::Tweet;
     use actix_web::{
+        http::header,
         test::{self, TestRequest},
         App,
     };
@@ -14,12 +17,38 @@ mod tests {
         crate::test::init();
         let message_test: &str = "Hey, I'm a test tweet!";
         let request_body = json!({ "message": message_test });
-        let mut app = test::init_service(App::new().configure(init_routes)).await;
+        let mut app = test::init_service(App::new().configure(routes)).await;
+
+        // Register and Login to exec protected routes
+        let res = TestRequest::post()
+            .uri("/auth/register")
+            .set_json(json!({
+                "name": "tweet",
+                "handle": "tweet",
+                "password": "admin"
+            }))
+            .send_request(&mut app)
+            .await;
+        assert!(res.status().is_success(), "Failed to register");
+
+        let res = TestRequest::post()
+            .uri("/auth/login")
+            .set_json(json!({
+                "handle": "tweet",
+                "password": "admin"
+            }))
+            .send_request(&mut app)
+            .await;
+
+        assert!(res.status().is_success(), "Failed to login");
+        let WebToken { token } = test::read_body_json(res).await;
+        let auth_headers = (header::AUTHORIZATION, format!("Bearer {}", token));
 
         // create a tweet
         let res = TestRequest::post()
             .uri("/tweets")
             .set_json(&request_body)
+            .append_header(auth_headers.clone())
             .send_request(&mut app)
             .await;
         assert!(res.status().is_success(), "Failed to create tweet");
@@ -52,6 +81,7 @@ mod tests {
         // delete tweet
         let res = TestRequest::delete()
             .uri(&format!("/tweets/{}", tweet.id.to_string()))
+            .append_header(auth_headers.clone())
             .send_request(&mut app)
             .await;
         assert!(res.status().is_success(), "Failed to delete tweet");

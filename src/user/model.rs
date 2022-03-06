@@ -35,10 +35,12 @@ pub struct User {
     pub password: String,
 }
 
-pub struct UserPub {
+// TODO: Split account { password } from user profile and remove below
+#[derive(Serialize, Deserialize)]
+pub struct PublicUser {
     pub id: Uuid,
-    pub name: String,   // Mary
-    pub handle: String, // @logiconly9 (unique)
+    pub name: String,
+    pub handle: String,
     pub created: NaiveDateTime,
 }
 
@@ -55,6 +57,14 @@ impl User {
         let conn = db::connection()?;
 
         let user = users::table.filter(users::id.eq(id)).first(&conn)?;
+
+        Ok(user)
+    }
+
+    pub fn find_by_handle(handle: &str) -> Result<Self, ApiError> {
+        let conn = db::connection()?;
+
+        let user = users::table.filter(users::handle.eq(handle)).first(&conn)?;
 
         Ok(user)
     }
@@ -83,8 +93,8 @@ impl User {
         Ok(())
     }
 
-    pub fn verify_password(&self, password: &[u8]) -> Result<bool, ApiError> {
-        argon2::verify_encoded(&self.password, password)
+    pub fn verify_password(&self, password: &str) -> Result<bool, ApiError> {
+        argon2::verify_encoded(&self.password, password.as_bytes())
             .map_err(|e| ApiError::new(500, format!("Failed to verify password: {}", e)))
     }
 
@@ -108,6 +118,7 @@ impl User {
     }
 }
 
+// TODO: Split account { password } from user profile and remove below
 impl From<CreateUserDto> for User {
     fn from(user: CreateUserDto) -> Self {
         User {
@@ -116,6 +127,17 @@ impl From<CreateUserDto> for User {
             handle: user.handle,
             created: Utc::now().naive_utc(),
             password: user.password,
+        }
+    }
+}
+
+impl From<User> for PublicUser {
+    fn from(user: User) -> Self {
+        PublicUser {
+            id: user.id,
+            handle: user.handle,
+            name: user.name,
+            created: user.created,
         }
     }
 }

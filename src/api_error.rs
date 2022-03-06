@@ -5,7 +5,7 @@ use serde::Deserialize;
 use serde_json::json;
 use std::fmt;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct ApiError {
     pub status_code: u16,
     pub message: String,

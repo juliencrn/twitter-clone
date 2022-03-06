@@ -12,13 +12,25 @@ The final model for the application looks like this:
 
 ## API Design
 
+
+all routes are prefixed by `/api/v1`.
+
 ```bash
 /tweets
-    GET: list last 50 tweets
-    POST: create a new tweet
-/tweets/:id
-    GET: find a tweet by its ID
-    DELETE: delete a tweet by its ID
+    GET /: list last 50 tweets
+    GET /{id}: get tweet by id
+    POST /: create a new tweet (require auth)
+    DELETE /{id}: delete a tweet by id (require auth)
+/users
+    GET /: list all users
+    GET /{id}: get user by id
+    UPDATE /{id}: update user by id (require auth)
+    DELETE /{id}: delete a tweet by id (require auth)
+/profile
+    GET /: get logged-in user (require auth)
+/auth
+    POST /register: Create an user
+    POST /login: Return the json web token
 ```
 
 ## Installation
