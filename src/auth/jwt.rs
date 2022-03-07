@@ -1,5 +1,5 @@
-use crate::api_error::ApiError;
 use crate::auth::AuthUser;
+use crate::errors::ApiError;
 use chrono::prelude::*;
 use jsonwebtoken::errors::ErrorKind;
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};

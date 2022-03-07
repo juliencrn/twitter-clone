@@ -19,7 +19,7 @@ mod tests {
         let request_body = json!({
             "name": "John",
             "handle": "nickname",
-            "password": "admin"
+            "password": "password"
         });
 
         // Register an user

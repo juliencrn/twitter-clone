@@ -1,4 +1,4 @@
-use crate::api_error::ApiError;
+use crate::errors::ApiError;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{Builder, ConnectionManager, Pool, PooledConnection};
 use lazy_static::lazy_static;

@@ -3,15 +3,16 @@ extern crate diesel;
 #[macro_use]
 extern crate log;
 
-pub mod api_error;
 pub mod auth;
 pub mod db;
+pub mod errors;
 pub mod response;
 pub mod routes;
 pub mod schema;
 pub mod server;
 pub mod tweet;
 pub mod user;
+pub mod validate;
 
 #[cfg(test)]
 mod test;

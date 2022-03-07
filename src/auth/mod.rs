@@ -8,7 +8,7 @@ pub use model::*;
 pub use routes::init_routes;
 
 // Helpers
-use crate::api_error::ApiError;
+use crate::errors::ApiError;
 
 pub fn require_owner(id: uuid::Uuid, auth: AuthUser) -> Result<(), ApiError> {
     if id == auth.id {

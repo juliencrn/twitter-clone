@@ -1,5 +1,5 @@
-use crate::api_error::ApiError;
 use crate::auth::validate_jwt;
+use crate::errors::ApiError;
 use crate::user::User;
 use actix_web::{dev::Payload, http, FromRequest, HttpRequest};
 use futures::future::{err, ok, Ready};

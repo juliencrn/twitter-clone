@@ -1,7 +1,8 @@
-use crate::api_error::ApiError;
 use crate::auth::AuthUser;
+use crate::errors::ApiError;
 use crate::response::Response;
-use crate::tweet::model::{Tweet, TweetRequest};
+use crate::tweet::model::{NewTweet, Tweet};
+use crate::validate::validate;
 use actix_web::{delete, get, post, web, HttpResponse};
 use uuid::Uuid;
 
@@ -14,31 +15,23 @@ pub async fn find_all() -> Result<HttpResponse, ApiError> {
 
 #[get("/tweets/{id}")]
 pub async fn find(uid: web::Path<Uuid>) -> Result<HttpResponse, ApiError> {
-    let tweet_id = uid.into_inner();
-    let tweet = Tweet::find(tweet_id)?;
+    let tweet = Tweet::find(uid.into_inner())?;
 
     Ok(HttpResponse::Ok().json(tweet))
 }
 
 #[post("/tweets")]
-pub async fn create(
-    tweet_req: web::Json<TweetRequest>,
-    _: AuthUser,
-) -> Result<HttpResponse, ApiError> {
-    let dto = match tweet_req.to_dto() {
-        Some(dto) => dto,
-        None => return Err(ApiError::new(500, "Unable to create new tweet".to_string())),
-    };
+pub async fn create(tweet_req: web::Json<NewTweet>, _: AuthUser) -> Result<HttpResponse, ApiError> {
+    validate(&tweet_req)?;
 
-    let tweet = Tweet::insert(dto)?;
+    let tweet = Tweet::insert(tweet_req.into_inner())?;
 
     Ok(HttpResponse::Created().json(tweet))
 }
 
 #[delete("/tweets/{id}")]
 pub async fn delete(uid: web::Path<Uuid>, _: AuthUser) -> Result<HttpResponse, ApiError> {
-    let tweet_id = uid.into_inner();
-    let tweet = Tweet::delete(tweet_id)?;
+    let tweet = Tweet::delete(uid.into_inner())?;
 
     Ok(HttpResponse::Ok().json(tweet))
 }

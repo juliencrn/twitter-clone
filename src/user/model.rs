@@ -1,5 +1,5 @@
-use crate::api_error::ApiError;
 use crate::db;
+use crate::errors::ApiError;
 use crate::schema::users;
 use argon2::Config;
 use chrono::{NaiveDateTime, Utc};
@@ -7,18 +7,39 @@ use diesel::prelude::*;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use validator::Validate;
 
-#[derive(Serialize, Deserialize)]
-pub struct CreateUserDto {
+#[derive(Serialize, Deserialize, Validate)]
+pub struct NewUser {
+    #[validate(length(
+        min = 3,
+        message = "name is required and must be at least 3 characters"
+    ))]
     pub name: String,
+    #[validate(length(
+        min = 3,
+        message = "handle is required and must be at least 3 characters"
+    ))]
     pub handle: String,
+    #[validate(length(
+        min = 6,
+        message = "password is required and must be at least 6 characters"
+    ))]
     pub password: String,
 }
 
-#[derive(Serialize, Deserialize, AsChangeset)]
+#[derive(Serialize, Deserialize, AsChangeset, Validate)]
 #[table_name = "users"]
-pub struct UpdateUserDto {
+pub struct UpdateUser {
+    #[validate(length(
+        min = 3,
+        message = "name is required and must be at least 3 characters"
+    ))]
     pub name: String,
+    #[validate(length(
+        min = 3,
+        message = "handle is required and must be at least 3 characters"
+    ))]
     pub handle: String,
 }
 
@@ -29,9 +50,6 @@ pub struct User {
     pub name: String,   // Mary
     pub handle: String, // @logiconly9 (unique)
     pub created: NaiveDateTime,
-
-    // Don't send it to the user
-    #[diesel(skip_deserializing)]
     pub password: String,
 }
 
@@ -69,7 +87,7 @@ impl User {
         Ok(user)
     }
 
-    pub fn create(user: CreateUserDto) -> Result<Self, ApiError> {
+    pub fn create(user: NewUser) -> Result<Self, ApiError> {
         let conn = db::connection()?;
 
         let mut user = User::from(user);
@@ -98,7 +116,7 @@ impl User {
             .map_err(|e| ApiError::new(500, format!("Failed to verify password: {}", e)))
     }
 
-    pub fn update(id: Uuid, user: UpdateUserDto) -> Result<Self, ApiError> {
+    pub fn update(id: Uuid, user: UpdateUser) -> Result<Self, ApiError> {
         let conn = db::connection()?;
 
         let user = diesel::update(users::table)
@@ -119,8 +137,8 @@ impl User {
 }
 
 // TODO: Split account { password } from user profile and remove below
-impl From<CreateUserDto> for User {
-    fn from(user: CreateUserDto) -> Self {
+impl From<NewUser> for User {
+    fn from(user: NewUser) -> Self {
         User {
             id: Uuid::new_v4(),
             name: user.name,

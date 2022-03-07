@@ -2,9 +2,10 @@ use chrono::{NaiveDateTime, Utc};
 use diesel::{self, prelude::*};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use validator::Validate;
 
-use crate::api_error::ApiError;
 use crate::db;
+use crate::errors::ApiError;
 use crate::schema::tweets;
 
 // TODO: Implement relation fields
@@ -32,28 +33,10 @@ pub struct Tweet {
                        */
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct TweetDto {
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct NewTweet {
+    #[validate(length(min = 1, message = "tweet message is missing"))]
     pub message: String,
-    pub asset: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct TweetRequest {
-    pub message: Option<String>,
-    pub asset: Option<String>,
-}
-
-impl TweetRequest {
-    pub fn to_dto(&self) -> Option<TweetDto> {
-        match &self.message {
-            Some(message) => Some(TweetDto {
-                message: String::from(message),
-                asset: String::new(),
-            }),
-            None => None,
-        }
-    }
 }
 
 impl Tweet {
@@ -78,17 +61,17 @@ impl Tweet {
         Ok(all_tweets)
     }
 
-    pub fn update(id: Uuid, dto: TweetDto) -> Result<Self, ApiError> {
+    pub fn update(id: Uuid, dto: NewTweet) -> Result<Self, ApiError> {
         let conn = db::connection()?;
 
         let tweet = diesel::update(tweets::table.find(id))
-            .set((tweets::message.eq(dto.message), tweets::asset.eq(dto.asset)))
+            .set(tweets::message.eq(dto.message))
             .get_result::<Tweet>(&conn)?;
 
         Ok(tweet)
     }
 
-    pub fn insert(dto: TweetDto) -> Result<Self, ApiError> {
+    pub fn insert(dto: NewTweet) -> Result<Self, ApiError> {
         let conn = db::connection()?;
 
         let tweet = diesel::insert_into(tweets::table)
@@ -107,8 +90,8 @@ impl Tweet {
     }
 }
 
-impl From<TweetDto> for Tweet {
-    fn from(dto: TweetDto) -> Self {
+impl From<NewTweet> for Tweet {
+    fn from(dto: NewTweet) -> Self {
         Tweet {
             id: Uuid::new_v4(),
             message: dto.message,
@@ -116,7 +99,7 @@ impl From<TweetDto> for Tweet {
             retweets: 0,
             comments: 0,
             created: Utc::now().naive_utc(),
-            asset: dto.asset,
+            asset: "".to_string(),
         }
     }
 }

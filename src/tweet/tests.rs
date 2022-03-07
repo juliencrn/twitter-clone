@@ -25,7 +25,7 @@ mod tests {
             .set_json(json!({
                 "name": "tweet",
                 "handle": "tweet",
-                "password": "admin"
+                "password": "password"
             }))
             .send_request(&mut app)
             .await;
@@ -35,7 +35,7 @@ mod tests {
             .uri("/auth/login")
             .set_json(json!({
                 "handle": "tweet",
-                "password": "admin"
+                "password": "password"
             }))
             .send_request(&mut app)
             .await;

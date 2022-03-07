@@ -1,15 +1,15 @@
-use crate::api_error::ApiError;
 use crate::auth::{require_owner, AuthUser};
+use crate::errors::ApiError;
 use crate::response::Response;
-use crate::user::{PublicUser, UpdateUserDto, User};
+use crate::user::{PublicUser, UpdateUser, User};
+use crate::validate::validate;
 use actix_web::{delete, get, put, web, HttpResponse};
 use serde_json::json;
 use uuid::Uuid;
 
 #[get("/users")]
 async fn find_all() -> Result<HttpResponse, ApiError> {
-    let users = User::find_all()?;
-    let users: Vec<PublicUser> = users
+    let users: Vec<PublicUser> = User::find_all()?
         .into_iter()
         .map(|u| PublicUser::from(u))
         .collect::<Vec<PublicUser>>();
@@ -19,8 +19,7 @@ async fn find_all() -> Result<HttpResponse, ApiError> {
 
 #[get("/users/{id}")]
 async fn find(id: web::Path<Uuid>) -> Result<HttpResponse, ApiError> {
-    let user_id = id.into_inner();
-    let user = User::find(user_id)?;
+    let user = User::find(id.into_inner())?;
     let user = PublicUser::from(user);
 
     Ok(HttpResponse::Ok().json(user))
@@ -29,9 +28,10 @@ async fn find(id: web::Path<Uuid>) -> Result<HttpResponse, ApiError> {
 #[put("/users/{id}")]
 async fn update(
     id: web::Path<Uuid>,
-    user: web::Json<UpdateUserDto>,
+    user: web::Json<UpdateUser>,
     auth: AuthUser,
 ) -> Result<HttpResponse, ApiError> {
+    validate(&user)?;
     let user_id = id.into_inner();
     require_owner(user_id, auth)?;
     let user = User::update(user_id, user.into_inner())?;

@@ -4,6 +4,7 @@ use diesel::result::Error as DieselError;
 use serde::Deserialize;
 use serde_json::json;
 use std::fmt;
+use validator::ValidationErrors;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct ApiError {
@@ -33,6 +34,25 @@ impl From<DieselError> for ApiError {
             DieselError::NotFound => ApiError::new(404, "Record not found".to_string()),
             err => ApiError::new(500, format!("Diesel error: {}", err)),
         }
+    }
+}
+
+impl From<ValidationErrors> for ApiError {
+    fn from(errors: ValidationErrors) -> ApiError {
+        let errors = errors
+            .field_errors()
+            .into_iter()
+            .map(|error| {
+                let default_error = format!("{} is required", error.0);
+                error.1[0]
+                    .message
+                    .as_ref()
+                    .unwrap_or(&std::borrow::Cow::Owned(default_error))
+                    .to_string()
+            })
+            .collect::<String>();
+
+        ApiError::new(422, errors)
     }
 }
 
