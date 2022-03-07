@@ -10,7 +10,7 @@ pub use routes::init_routes;
 // Helpers
 use crate::errors::ApiError;
 
-pub fn require_owner(id: uuid::Uuid, auth: AuthUser) -> Result<(), ApiError> {
+pub fn require_owner(id: uuid::Uuid, auth: Auth) -> Result<(), ApiError> {
     if id == auth.id {
         return Ok(());
     }

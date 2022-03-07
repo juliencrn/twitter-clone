@@ -1,4 +1,4 @@
-use crate::auth::AuthUser;
+use crate::auth::Auth;
 use crate::errors::ApiError;
 use chrono::prelude::*;
 use jsonwebtoken::errors::ErrorKind;
@@ -20,23 +20,23 @@ pub struct WebToken {
     pub token: String,
 }
 
-impl From<Claims> for AuthUser {
+impl From<Claims> for Auth {
     fn from(claims: Claims) -> Self {
-        AuthUser {
+        Auth {
             id: claims.id,
             handle: claims.handle,
         }
     }
 }
 
-pub fn generate_jwt(payload: AuthUser) -> Result<WebToken, ApiError> {
+pub fn generate_jwt(payload: Auth) -> Result<WebToken, ApiError> {
     let header = Header {
         kid: Some("signing_key".to_owned()),
         alg: Algorithm::HS512,
         ..Default::default()
     };
 
-    let AuthUser { id, handle } = payload;
+    let Auth { id, handle } = payload;
     let now = Utc::now().timestamp() as usize;
     let claims = Claims {
         id,
@@ -57,7 +57,7 @@ pub fn generate_jwt(payload: AuthUser) -> Result<WebToken, ApiError> {
     Ok(WebToken { token })
 }
 
-pub fn validate_jwt(token: &str) -> Result<AuthUser, ApiError> {
+pub fn validate_jwt(token: &str) -> Result<Auth, ApiError> {
     let key = DecodingKey::from_secret(JWT_SECRET_KEY);
     let validation = Validation::new(Algorithm::HS512);
 
@@ -74,5 +74,5 @@ pub fn validate_jwt(token: &str) -> Result<AuthUser, ApiError> {
         },
     };
 
-    Ok(AuthUser::from(token_data.claims))
+    Ok(Auth::from(token_data.claims))
 }

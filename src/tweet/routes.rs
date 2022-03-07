@@ -1,4 +1,4 @@
-use crate::auth::AuthUser;
+use crate::auth::Auth;
 use crate::errors::ApiError;
 use crate::response::Response;
 use crate::tweet::model::{NewTweet, Tweet};
@@ -21,7 +21,7 @@ pub async fn find(uid: web::Path<Uuid>) -> Result<HttpResponse, ApiError> {
 }
 
 #[post("/tweets")]
-pub async fn create(tweet_req: web::Json<NewTweet>, _: AuthUser) -> Result<HttpResponse, ApiError> {
+pub async fn create(tweet_req: web::Json<NewTweet>, _: Auth) -> Result<HttpResponse, ApiError> {
     validate(&tweet_req)?;
 
     let tweet = Tweet::insert(tweet_req.into_inner())?;
@@ -30,7 +30,7 @@ pub async fn create(tweet_req: web::Json<NewTweet>, _: AuthUser) -> Result<HttpR
 }
 
 #[delete("/tweets/{id}")]
-pub async fn delete(uid: web::Path<Uuid>, _: AuthUser) -> Result<HttpResponse, ApiError> {
+pub async fn delete(uid: web::Path<Uuid>, _: Auth) -> Result<HttpResponse, ApiError> {
     let tweet = Tweet::delete(uid.into_inner())?;
 
     Ok(HttpResponse::Ok().json(tweet))

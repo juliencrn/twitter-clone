@@ -7,14 +7,14 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct AuthUser {
+pub struct Auth {
     pub id: Uuid,
     pub handle: String,
 }
 
-impl From<User> for AuthUser {
+impl From<User> for Auth {
     fn from(user: User) -> Self {
-        AuthUser {
+        Auth {
             id: user.id,
             handle: user.handle,
         }
@@ -30,8 +30,8 @@ pub struct Credentials {
 /// Extractor for pulling the identity out of a request.
 ///
 /// More than just an extractor, it returns an 401 when invocated if the token if auth invalid
-/// Simply add "user: AuthUser" to a handler to invoke this.
-impl FromRequest for AuthUser {
+/// Simply add "user: Auth" to a handler to invoke this.
+impl FromRequest for Auth {
     type Error = ApiError;
     type Future = Ready<Result<Self, Self::Error>>;
 

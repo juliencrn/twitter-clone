@@ -1,4 +1,4 @@
-use crate::auth::{generate_jwt, AuthUser, Credentials};
+use crate::auth::{generate_jwt, Auth, Credentials};
 use crate::errors::ApiError;
 use crate::user::{NewUser, User};
 use crate::validate::validate;
@@ -18,7 +18,7 @@ async fn login(credentials: web::Json<Credentials>) -> Result<HttpResponse, ApiE
     let Credentials { handle, password } = credentials.into_inner();
     let user: User = User::find_by_handle(&handle)?;
     let is_valid = user.verify_password(&password)?;
-    let token = generate_jwt(AuthUser::from(user))?;
+    let token = generate_jwt(Auth::from(user))?;
 
     match is_valid {
         true => Ok(HttpResponse::Ok().json(token)),

@@ -1,4 +1,4 @@
-use crate::auth::{require_owner, AuthUser};
+use crate::auth::{require_owner, Auth};
 use crate::errors::ApiError;
 use crate::response::Response;
 use crate::user::{PublicUser, UpdateUser, User};
@@ -29,7 +29,7 @@ async fn find(id: web::Path<Uuid>) -> Result<HttpResponse, ApiError> {
 async fn update(
     id: web::Path<Uuid>,
     user: web::Json<UpdateUser>,
-    auth: AuthUser,
+    auth: Auth,
 ) -> Result<HttpResponse, ApiError> {
     validate(&user)?;
     let user_id = id.into_inner();
@@ -41,7 +41,7 @@ async fn update(
 }
 
 #[delete("/users/{id}")]
-async fn delete(id: web::Path<Uuid>, auth: AuthUser) -> Result<HttpResponse, ApiError> {
+async fn delete(id: web::Path<Uuid>, auth: Auth) -> Result<HttpResponse, ApiError> {
     let user_id = id.into_inner();
     require_owner(user_id, auth)?;
     let num_deleted = User::delete(user_id)?;
@@ -50,7 +50,7 @@ async fn delete(id: web::Path<Uuid>, auth: AuthUser) -> Result<HttpResponse, Api
 }
 
 #[get("/profile")]
-async fn profile(auth: AuthUser) -> Result<HttpResponse, ApiError> {
+async fn profile(auth: Auth) -> Result<HttpResponse, ApiError> {
     let user = User::find(auth.id)?;
     let user = PublicUser::from(user);
 
