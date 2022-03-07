@@ -1,12 +1,10 @@
+use crate::db;
+use crate::errors::ApiError;
+use crate::schema::tweets;
 use chrono::{NaiveDateTime, Utc};
 use diesel::{self, prelude::*};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use validator::Validate;
-
-use crate::db;
-use crate::errors::ApiError;
-use crate::schema::tweets;
 
 // TODO: Implement relation fields
 #[derive(Queryable, Insertable, Deserialize, Serialize)]
@@ -14,8 +12,7 @@ use crate::schema::tweets;
 pub struct Tweet {
     pub id: Uuid,
     pub message: String, // Hello world!
-
-    // author: Uuid,           // User
+    pub author: Uuid,    // User
     // hashtags: Vec<Uuid>,    // Hashtag[]
     pub likes: i32,             // 86
     pub retweets: i32,          // 6
@@ -33,10 +30,10 @@ pub struct Tweet {
                        */
 }
 
-#[derive(Debug, Deserialize, Serialize, Validate)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct NewTweet {
-    #[validate(length(min = 1, message = "tweet message is missing"))]
     pub message: String,
+    pub author: Uuid,
 }
 
 impl Tweet {
@@ -71,7 +68,7 @@ impl Tweet {
         Ok(tweet)
     }
 
-    pub fn insert(dto: NewTweet) -> Result<Self, ApiError> {
+    pub fn create(dto: NewTweet) -> Result<Self, ApiError> {
         let conn = db::connection()?;
 
         let tweet = diesel::insert_into(tweets::table)
@@ -95,6 +92,7 @@ impl From<NewTweet> for Tweet {
         Tweet {
             id: Uuid::new_v4(),
             message: dto.message,
+            author: dto.author,
             likes: 0,
             retweets: 0,
             comments: 0,

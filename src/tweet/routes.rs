@@ -4,7 +4,15 @@ use crate::response::Response;
 use crate::tweet::model::{NewTweet, Tweet};
 use crate::validate::validate;
 use actix_web::{delete, get, post, web, HttpResponse};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use validator::Validate;
+
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct NewTweetRequest {
+    #[validate(length(min = 1, message = "tweet message is missing"))]
+    pub message: String,
+}
 
 #[get("/tweets")]
 pub async fn find_all() -> Result<HttpResponse, ApiError> {
@@ -21,10 +29,18 @@ pub async fn find(uid: web::Path<Uuid>) -> Result<HttpResponse, ApiError> {
 }
 
 #[post("/tweets")]
-pub async fn create(tweet_req: web::Json<NewTweet>, _: Auth) -> Result<HttpResponse, ApiError> {
+pub async fn create(
+    tweet_req: web::Json<NewTweetRequest>,
+    auth: Auth,
+) -> Result<HttpResponse, ApiError> {
     validate(&tweet_req)?;
 
-    let tweet = Tweet::insert(tweet_req.into_inner())?;
+    let new_tweet = NewTweet {
+        message: tweet_req.into_inner().message,
+        author: auth.id,
+    };
+
+    let tweet = Tweet::create(new_tweet)?;
 
     Ok(HttpResponse::Created().json(tweet))
 }

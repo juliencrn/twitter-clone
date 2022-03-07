@@ -2,6 +2,7 @@ table! {
     tweets (id) {
         id -> Uuid,
         message -> Varchar,
+        author -> Uuid,
         likes -> Int4,
         retweets -> Int4,
         comments -> Int4,
@@ -19,6 +20,8 @@ table! {
         password -> Varchar,
     }
 }
+
+joinable!(tweets -> users (author));
 
 allow_tables_to_appear_in_same_query!(
     tweets,

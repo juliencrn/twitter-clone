@@ -16,7 +16,6 @@ mod tests {
         // prepare
         crate::test::init();
         let message_test: &str = "Hey, I'm a test tweet!";
-        let request_body = json!({ "message": message_test });
         let mut app = test::init_service(App::new().configure(routes)).await;
 
         // Register and Login to exec protected routes
@@ -47,7 +46,7 @@ mod tests {
         // create a tweet
         let res = TestRequest::post()
             .uri("/tweets")
-            .set_json(&request_body)
+            .set_json(json!({ "message": message_test }))
             .append_header(auth_headers.clone())
             .send_request(&mut app)
             .await;
