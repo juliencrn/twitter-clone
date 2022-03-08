@@ -4,12 +4,28 @@ mod tests {
     use crate::response::Response;
     use crate::routes::routes;
     use crate::tweet::Tweet;
+    use crate::user::PublicUser;
     use actix_web::{
         http::header,
         test::{self, TestRequest},
         App,
     };
     use serde_json::json;
+
+    fn register() -> TestRequest {
+        TestRequest::post().uri("/auth/register").set_json(json!({
+            "name": "tweet",
+            "handle": "tweet",
+            "password": "password"
+        }))
+    }
+
+    fn login() -> TestRequest {
+        TestRequest::post().uri("/auth/login").set_json(json!({
+            "handle": "tweet",
+            "password": "password"
+        }))
+    }
 
     #[actix_web::test]
     async fn test_tweet() {
@@ -19,29 +35,26 @@ mod tests {
         let mut app = test::init_service(App::new().configure(routes)).await;
 
         // Register and Login to exec protected routes
-        let res = TestRequest::post()
-            .uri("/auth/register")
-            .set_json(json!({
-                "name": "tweet",
-                "handle": "tweet",
-                "password": "password"
-            }))
-            .send_request(&mut app)
-            .await;
+        let res = register().send_request(&mut app).await;
         assert!(res.status().is_success(), "Failed to register");
 
-        let res = TestRequest::post()
-            .uri("/auth/login")
-            .set_json(json!({
-                "handle": "tweet",
-                "password": "password"
-            }))
-            .send_request(&mut app)
-            .await;
-
+        // Login
+        let res = login().send_request(&mut app).await;
         assert!(res.status().is_success(), "Failed to login");
+
+        // Extract Authorization header
         let WebToken { token } = test::read_body_json(res).await;
         let auth_headers = (header::AUTHORIZATION, format!("Bearer {}", token));
+
+        // /profile to get user id
+        let res = TestRequest::get()
+            .uri("/profile")
+            .append_header(auth_headers.clone())
+            .send_request(&mut app)
+            .await;
+        assert!(res.status().is_success(), "Failed to get logged-in user");
+
+        let user: PublicUser = test::read_body_json(res).await;
 
         // create a tweet
         let res = TestRequest::post()
@@ -59,9 +72,23 @@ mod tests {
             .send_request(&mut app)
             .await;
         assert!(res.status().is_success(), "Failed to find tweet");
-
         let tweet: Tweet = test::read_body_json(res).await;
         assert_eq!(tweet.message, message_test, "Found wrong tweet");
+        assert_eq!(tweet.likes, 0, "Wrong default like count");
+
+        // find tweets by user
+        let res = TestRequest::get()
+            .uri(&format!("/tweets?user_id={}", user.id))
+            .send_request(&mut app)
+            .await;
+        assert!(res.status().is_success(), "Failed to find tweets by user");
+        let tweets: Response<Tweet> = test::read_body_json(res).await;
+        let tweet_count = tweets.results.len();
+        let tweet = tweets.results.get(0).unwrap();
+
+        assert_eq!(tweet_count, 1, "Wrong tweets by user count");
+        assert_eq!(tweet.message, message_test, "Found wrong tweet");
+        assert_eq!(tweet.author, user.id, "Found wrong tweet");
         assert_eq!(tweet.likes, 0, "Wrong default like count");
 
         // find all tweets

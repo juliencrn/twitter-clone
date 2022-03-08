@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 // TODO: Implement relation fields
-#[derive(Queryable, Insertable, Deserialize, Serialize)]
+#[derive(Queryable, Insertable, Deserialize, Serialize, Debug)]
 #[table_name = "tweets"]
 pub struct Tweet {
     pub id: Uuid,
@@ -36,6 +36,8 @@ pub struct NewTweet {
     pub author: Uuid,
 }
 
+const DEFAULT_LIMIT: i64 = 50;
+
 impl Tweet {
     pub fn find(id: Uuid) -> Result<Self, ApiError> {
         let conn = db::connection()?;
@@ -47,15 +49,27 @@ impl Tweet {
         Ok(tweet)
     }
 
-    pub fn find_all(limit: i64) -> Result<Vec<Self>, ApiError> {
+    pub fn find_by_author(user_id: Uuid, limit: Option<i64>) -> Result<Vec<Self>, ApiError> {
         let conn = db::connection()?;
 
-        let all_tweets = tweets::table
+        let results = tweets::table
+            .filter(tweets::author.eq(user_id))
             .order(tweets::created.desc())
-            .limit(limit)
+            .limit(limit.unwrap_or(DEFAULT_LIMIT))
             .load::<Tweet>(&conn)?;
 
-        Ok(all_tweets)
+        Ok(results)
+    }
+
+    pub fn find_all(limit: Option<i64>) -> Result<Vec<Self>, ApiError> {
+        let conn = db::connection()?;
+
+        let results = tweets::table
+            .order(tweets::created.desc())
+            .limit(limit.unwrap_or(DEFAULT_LIMIT))
+            .load::<Tweet>(&conn)?;
+
+        Ok(results)
     }
 
     pub fn update(id: Uuid, dto: NewTweet) -> Result<Self, ApiError> {

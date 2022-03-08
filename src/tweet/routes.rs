@@ -14,9 +14,18 @@ pub struct NewTweetRequest {
     pub message: String,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct FindParams {
+    user_id: Option<Uuid>,
+    limit: Option<i64>,
+}
+
 #[get("/tweets")]
-pub async fn find_all() -> Result<HttpResponse, ApiError> {
-    let tweets = Tweet::find_all(50)?;
+pub async fn find_all(query: web::Query<FindParams>) -> Result<HttpResponse, ApiError> {
+    let tweets = match query.user_id {
+        Some(user_id) => Tweet::find_by_author(user_id, query.limit),
+        None => Tweet::find_all(query.limit),
+    }?;
 
     Ok(HttpResponse::Ok().json(Response::from(tweets)))
 }

@@ -49,6 +49,7 @@ async fn delete(id: web::Path<Uuid>, auth: Auth) -> Result<HttpResponse, ApiErro
     Ok(HttpResponse::Ok().json(json!({ "deleted": num_deleted })))
 }
 
+// Todo: move into /users prefix
 #[get("/profile")]
 async fn profile(auth: Auth) -> Result<HttpResponse, ApiError> {
     let user = User::find(auth.id)?;

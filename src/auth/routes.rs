@@ -1,6 +1,6 @@
 use crate::auth::{generate_jwt, Auth, Credentials};
 use crate::errors::ApiError;
-use crate::user::{NewUser, User};
+use crate::user::{NewUser, PublicUser, User};
 use crate::validate::validate;
 use actix_web::{post, web, HttpResponse};
 
@@ -10,7 +10,7 @@ async fn register(user: web::Json<NewUser>) -> Result<HttpResponse, ApiError> {
 
     let user = User::create(user.into_inner())?;
 
-    Ok(HttpResponse::Ok().json(user))
+    Ok(HttpResponse::Ok().json(PublicUser::from(user)))
 }
 
 #[post("/login")]
