@@ -12,6 +12,7 @@ pub mod schema;
 pub mod server;
 pub mod tweet;
 pub mod user;
+pub mod user_account;
 pub mod validate;
 
 #[cfg(test)]

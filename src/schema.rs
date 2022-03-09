@@ -12,6 +12,15 @@ table! {
 }
 
 table! {
+    user_accounts (id) {
+        id -> Uuid,
+        email -> Varchar,
+        user_id -> Uuid,
+        password -> Varchar,
+    }
+}
+
+table! {
     users (id) {
         id -> Uuid,
         name -> Varchar,
@@ -22,8 +31,10 @@ table! {
 }
 
 joinable!(tweets -> users (author));
+joinable!(user_accounts -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
     tweets,
+    user_accounts,
     users,
 );
