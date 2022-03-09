@@ -1,6 +1,7 @@
 use crate::auth::validate_jwt;
 use crate::errors::ApiError;
 use crate::user::User;
+use crate::user_account::UserAccount;
 use actix_web::{dev::Payload, http, FromRequest, HttpRequest};
 use futures::future::{err, ok, Ready};
 use serde::{Deserialize, Serialize};
@@ -9,22 +10,20 @@ use uuid::Uuid;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Auth {
     pub id: Uuid,
-    pub handle: String,
 }
 
 impl From<User> for Auth {
     fn from(user: User) -> Self {
-        Auth {
-            id: user.id,
-            handle: user.handle,
-        }
+        Auth { id: user.id }
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct Credentials {
-    pub handle: String,
-    pub password: String,
+impl From<UserAccount> for Auth {
+    fn from(account: UserAccount) -> Self {
+        Auth {
+            id: account.user_id,
+        }
+    }
 }
 
 /// Extractor for pulling the identity out of a request.

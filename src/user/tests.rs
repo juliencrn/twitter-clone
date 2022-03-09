@@ -2,7 +2,7 @@
 mod tests {
     use crate::auth::WebToken;
     use crate::routes;
-    use crate::user::PublicUser;
+    use crate::user::User;
     use actix_web::{
         http::header,
         test::{self, TestRequest},
@@ -15,9 +15,10 @@ mod tests {
         crate::test::init();
 
         let request_body = json!({
-            "name": "John",
-            "handle": "nickname2",
-            "password": "admin2"
+            "name": "User",
+            "handle": "user",
+            "email": "user@mail.com",
+            "password": "password"
         });
 
         let mut app = test::init_service(App::new().configure(routes::routes)).await;
@@ -31,16 +32,16 @@ mod tests {
         assert!(resp.status().is_success(), "Failed to register user");
 
         // Find the created user
-        let user: PublicUser = test::read_body_json(resp).await;
+        let user: User = test::read_body_json(resp).await;
         let resp = TestRequest::get()
             .uri(&format!("/users/{}", user.id))
             .send_request(&mut app)
             .await;
         assert!(resp.status().is_success(), "Failed to find user");
 
-        let user: PublicUser = test::read_body_json(resp).await;
-        assert_eq!(user.name, "John", "Found wrong user");
-        assert_eq!(user.handle, "nickname2", "Found wrong user");
+        let user: User = test::read_body_json(resp).await;
+        assert_eq!(user.name, "User", "Found wrong user");
+        assert_eq!(user.handle, "user", "Found wrong user");
 
         // Login just to get the auth token
         let res = TestRequest::post()
@@ -69,7 +70,7 @@ mod tests {
             .await;
         assert!(resp.status().is_success(), "Failed to update user");
 
-        let user: PublicUser = test::read_body_json(resp).await;
+        let user: User = test::read_body_json(resp).await;
         assert_eq!("Johnny", user.name, "Failed to update the name");
         assert_eq!("newNickname", user.handle, "Failed to update the handle");
 

@@ -11,7 +11,6 @@ const DAY: usize = 86400000;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Claims {
     pub id: uuid::Uuid,
-    pub handle: String,
     pub exp: usize,
 }
 
@@ -22,10 +21,7 @@ pub struct WebToken {
 
 impl From<Claims> for Auth {
     fn from(claims: Claims) -> Self {
-        Auth {
-            id: claims.id,
-            handle: claims.handle,
-        }
+        Auth { id: claims.id }
     }
 }
 
@@ -36,11 +32,10 @@ pub fn generate_jwt(payload: Auth) -> Result<WebToken, ApiError> {
         ..Default::default()
     };
 
-    let Auth { id, handle } = payload;
+    let Auth { id } = payload;
     let now = Utc::now().timestamp() as usize;
     let claims = Claims {
         id,
-        handle,
         exp: now + 24 * DAY,
     };
 

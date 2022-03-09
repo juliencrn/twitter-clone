@@ -2,7 +2,7 @@
 mod tests {
     use crate::auth::WebToken;
     use crate::routes::routes;
-    use crate::user::PublicUser;
+    use crate::user::User;
     use actix_web::{
         http::header,
         test::{self, TestRequest},
@@ -17,8 +17,9 @@ mod tests {
         let mut app = test::init_service(App::new().configure(routes)).await;
 
         let request_body = json!({
-            "name": "John",
-            "handle": "nickname",
+            "name": "Auth",
+            "handle": "auth",
+            "email": "auth@mail.com",
             "password": "password"
         });
 
@@ -45,7 +46,7 @@ mod tests {
         let resp = TestRequest::post()
             .uri("/auth/login")
             .set_json(json!({
-                "handle": "nickname",
+                "email": "auth@mail.com",
                 "password": "wrong"
             }))
             .send_request(&mut app)
@@ -56,6 +57,17 @@ mod tests {
             "Try to login with invalid credentials shouldn't work"
         );
 
+        // Get my profile
+        let res = TestRequest::get()
+            .uri("/profile")
+            .append_header((header::AUTHORIZATION, format!("Bearer {}", jwt.token)))
+            .send_request(&mut app)
+            .await;
+        assert!(res.status().is_success(), "Failed to load loggedIn user");
+
+        let user: User = test::read_body_json(res).await;
+        assert_eq!(user.handle, "auth", "Profile fetches wrong user");
+
         // Get my profile should fail without authorization header
         let res = TestRequest::get()
             .uri("/profile")
@@ -65,17 +77,5 @@ mod tests {
             res.status().is_client_error(),
             "This routes should be protected"
         );
-
-        // Get my profile
-        let res = TestRequest::get()
-            .uri("/profile")
-            .append_header((header::AUTHORIZATION, format!("Bearer {}", jwt.token)))
-            .send_request(&mut app)
-            .await;
-        assert!(res.status().is_success(), "Failed to load loggedIn user");
-
-        let user: PublicUser = test::read_body_json(res).await;
-
-        assert_eq!(user.handle, "nickname", "Profile fetches wrong user");
     }
 }

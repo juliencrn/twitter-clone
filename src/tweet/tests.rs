@@ -4,7 +4,7 @@ mod tests {
     use crate::response::Response;
     use crate::routes::routes;
     use crate::tweet::Tweet;
-    use crate::user::PublicUser;
+    use crate::user::User;
     use actix_web::{
         http::header,
         test::{self, TestRequest},
@@ -16,13 +16,14 @@ mod tests {
         TestRequest::post().uri("/auth/register").set_json(json!({
             "name": "tweet",
             "handle": "tweet",
+            "email": "tweet@mail.com",
             "password": "password"
         }))
     }
 
     fn login() -> TestRequest {
         TestRequest::post().uri("/auth/login").set_json(json!({
-            "handle": "tweet",
+            "email": "tweet@mail.com",
             "password": "password"
         }))
     }
@@ -54,7 +55,7 @@ mod tests {
             .await;
         assert!(res.status().is_success(), "Failed to get logged-in user");
 
-        let user: PublicUser = test::read_body_json(res).await;
+        let user: User = test::read_body_json(res).await;
 
         // create a tweet
         let res = TestRequest::post()
@@ -65,6 +66,9 @@ mod tests {
             .await;
         assert!(res.status().is_success(), "Failed to create tweet");
         let tweet: Tweet = test::read_body_json(res).await;
+
+        println!("tweet: {:#?}", tweet);
+        println!("/tweets/{}", tweet.id.to_string());
 
         // find a tweet
         let res = TestRequest::get()
@@ -84,9 +88,8 @@ mod tests {
         assert!(res.status().is_success(), "Failed to find tweets by user");
         let tweets: Response<Tweet> = test::read_body_json(res).await;
         let tweet_count = tweets.results.len();
-        let tweet = tweets.results.get(0).unwrap();
-
         assert_eq!(tweet_count, 1, "Wrong tweets by user count");
+        let tweet = tweets.results.get(0).unwrap();
         assert_eq!(tweet.message, message_test, "Found wrong tweet");
         assert_eq!(tweet.author, user.id, "Found wrong tweet");
         assert_eq!(tweet.likes, 0, "Wrong default like count");

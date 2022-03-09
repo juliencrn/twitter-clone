@@ -1,7 +1,8 @@
 use crate::auth::{require_owner, Auth};
 use crate::errors::ApiError;
 use crate::response::Response;
-use crate::user::{PublicUser, UpdateUser, User};
+use crate::user::{UpdateUser, User};
+use crate::user_account::UserAccount;
 use crate::validate::validate;
 use actix_web::{delete, get, put, web, HttpResponse};
 use serde_json::json;
@@ -9,10 +10,7 @@ use uuid::Uuid;
 
 #[get("/users")]
 async fn find_all() -> Result<HttpResponse, ApiError> {
-    let users: Vec<PublicUser> = User::find_all()?
-        .into_iter()
-        .map(|u| PublicUser::from(u))
-        .collect::<Vec<PublicUser>>();
+    let users: Vec<User> = User::find_all()?;
 
     Ok(HttpResponse::Ok().json(Response::from(users)))
 }
@@ -20,7 +18,6 @@ async fn find_all() -> Result<HttpResponse, ApiError> {
 #[get("/users/{id}")]
 async fn find(id: web::Path<Uuid>) -> Result<HttpResponse, ApiError> {
     let user = User::find(id.into_inner())?;
-    let user = PublicUser::from(user);
 
     Ok(HttpResponse::Ok().json(user))
 }
@@ -35,7 +32,6 @@ async fn update(
     let user_id = id.into_inner();
     require_owner(user_id, auth)?;
     let user = User::update(user_id, user.into_inner())?;
-    let user = PublicUser::from(user);
 
     Ok(HttpResponse::Ok().json(user))
 }
@@ -44,6 +40,15 @@ async fn update(
 async fn delete(id: web::Path<Uuid>, auth: Auth) -> Result<HttpResponse, ApiError> {
     let user_id = id.into_inner();
     require_owner(user_id, auth)?;
+
+    // Before delete an user, delete its linked accounts
+    if let Ok(accounts) = UserAccount::find_by_user(user_id) {
+        for account in &accounts {
+            UserAccount::delete(account.id)?;
+        }
+    }
+
+    // Then, delete the user
     let num_deleted = User::delete(user_id)?;
 
     Ok(HttpResponse::Ok().json(json!({ "deleted": num_deleted })))
@@ -53,7 +58,6 @@ async fn delete(id: web::Path<Uuid>, auth: Auth) -> Result<HttpResponse, ApiErro
 #[get("/profile")]
 async fn profile(auth: Auth) -> Result<HttpResponse, ApiError> {
     let user = User::find(auth.id)?;
-    let user = PublicUser::from(user);
 
     Ok(HttpResponse::Ok().json(user))
 }

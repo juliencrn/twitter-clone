@@ -1,13 +1,15 @@
 use crate::db;
 use crate::errors::ApiError;
 use crate::schema::user_accounts;
+use crate::user::User;
 use argon2::Config;
 use diesel::prelude::*;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Queryable, Insertable)]
+#[derive(Serialize, Deserialize, Queryable, Insertable, Debug, Identifiable, Associations)]
+#[belongs_to(User)]
 #[table_name = "user_accounts"]
 pub struct UserAccount {
     pub id: Uuid,
@@ -18,7 +20,6 @@ pub struct UserAccount {
 
 #[derive(Serialize, Deserialize)]
 pub struct NewUserAccount {
-    pub id: Uuid,
     pub email: String,
     pub user_id: Uuid,
     pub password: String,
@@ -41,6 +42,16 @@ impl UserAccount {
         let result = user_accounts::table
             .filter(user_accounts::user_id.eq(user_id))
             .load::<UserAccount>(&conn)?;
+
+        Ok(result)
+    }
+
+    pub fn find_by_email(email: &str) -> Result<Self, ApiError> {
+        let conn = db::connection()?;
+
+        let result = user_accounts::table
+            .filter(user_accounts::email.eq(email))
+            .first::<UserAccount>(&conn)?;
 
         Ok(result)
     }

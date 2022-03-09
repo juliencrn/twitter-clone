@@ -50,7 +50,9 @@ impl From<ValidationErrors> for ApiError {
                     .unwrap_or(&std::borrow::Cow::Owned(default_error))
                     .to_string()
             })
-            .collect::<String>();
+            // .collect::<Vec<String>>()
+            .next()
+            .unwrap_or("Validation error".to_string());
 
         ApiError::new(422, errors)
     }

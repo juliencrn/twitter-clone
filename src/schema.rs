@@ -26,7 +26,6 @@ table! {
         name -> Varchar,
         handle -> Varchar,
         created -> Timestamp,
-        password -> Varchar,
     }
 }
 
