@@ -1,5 +1,6 @@
 use crate::auth::Auth;
 use crate::errors::ApiError;
+use crate::hashtag::{Hashtag, NewHashtag};
 use crate::response::Response;
 use crate::tweet::model::{NewTweet, Tweet};
 use crate::validate::validate;
@@ -12,6 +13,15 @@ use validator::Validate;
 pub struct NewTweetRequest {
     #[validate(length(min = 1, message = "tweet message is missing"))]
     pub message: String,
+
+    #[validate]
+    pub hashtags: Option<Vec<RequestHashtag>>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct RequestHashtag {
+    #[validate(length(min = 3, message = "hashtag must be at least 3 characters"))]
+    name: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -44,12 +54,22 @@ pub async fn create(
 ) -> Result<HttpResponse, ApiError> {
     validate(&tweet_req)?;
 
-    let new_tweet = NewTweet {
-        message: tweet_req.into_inner().message,
-        author: auth.id,
-    };
+    let NewTweetRequest { message, hashtags } = tweet_req.into_inner();
 
-    let tweet = Tweet::create(new_tweet)?;
+    let tweet = Tweet::create(NewTweet {
+        message: &message,
+        author: auth.id,
+    })?;
+
+    // If there is hashtags, save it
+    if let Some(req_hashtags) = hashtags {
+        for req_hashtag in req_hashtags {
+            let new_hashtag = NewHashtag {
+                name: &req_hashtag.name,
+            };
+            Hashtag::create(new_hashtag, tweet.id)?;
+        }
+    }
 
     Ok(HttpResponse::Created().json(tweet))
 }

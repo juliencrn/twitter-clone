@@ -6,8 +6,8 @@ use diesel::{self, prelude::*};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-// TODO: Implement relation fields
-#[derive(Queryable, Insertable, Deserialize, Serialize, Debug)]
+// TODO: Hashtags could be added in a PublicUser struct
+#[derive(Queryable, Deserialize, Insertable, Serialize, Debug, Identifiable, Associations)]
 #[table_name = "tweets"]
 pub struct Tweet {
     pub id: Uuid,
@@ -30,9 +30,10 @@ pub struct Tweet {
                        */
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct NewTweet {
-    pub message: String,
+#[derive(Insertable)]
+#[table_name = "tweets"]
+pub struct NewTweet<'a> {
+    pub message: &'a str,
     pub author: Uuid,
 }
 
@@ -82,11 +83,11 @@ impl Tweet {
         Ok(tweet)
     }
 
-    pub fn create(dto: NewTweet) -> Result<Self, ApiError> {
+    pub fn create(new_tweet: NewTweet) -> Result<Self, ApiError> {
         let conn = db::connection()?;
 
         let tweet = diesel::insert_into(tweets::table)
-            .values(Tweet::from(dto))
+            .values(Tweet::from(new_tweet))
             .get_result::<Tweet>(&conn)?;
 
         Ok(tweet)
@@ -101,12 +102,12 @@ impl Tweet {
     }
 }
 
-impl From<NewTweet> for Tweet {
-    fn from(dto: NewTweet) -> Self {
+impl<'a> From<NewTweet<'a>> for Tweet {
+    fn from(new_tweet: NewTweet) -> Self {
         Tweet {
             id: Uuid::new_v4(),
-            message: dto.message,
-            author: dto.author,
+            message: new_tweet.message.to_string(),
+            author: new_tweet.author,
             likes: 0,
             retweets: 0,
             comments: 0,

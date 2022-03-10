@@ -6,6 +6,7 @@ extern crate log;
 pub mod auth;
 pub mod db;
 pub mod errors;
+pub mod hashtag;
 pub mod response;
 pub mod routes;
 pub mod schema;
